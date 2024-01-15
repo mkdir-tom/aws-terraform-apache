@@ -17,7 +17,7 @@ provider "aws" {
 
 # terraform init
 # terraform plan
-# terraform apply
+# terraform apply -var-file values.tfvars
 # terraform state list
 # terraform state show name
 # terraform destroy --auto-approve

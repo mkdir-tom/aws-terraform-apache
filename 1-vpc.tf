@@ -1,5 +1,5 @@
 resource "aws_vpc" "my-web-vpc" {
-  cidr_block       = "10.0.0.0/16"
+  cidr_block = "10.0.0.0/16"
 
   tags = {
     Name = "my-web-vpc"
@@ -19,8 +19,8 @@ resource "aws_route_table" "my-web-route-table" {
   }
 
   route {
-    ipv6_cidr_block        = "::/0"
-    gateway_id = aws_internet_gateway.igw.id
+    ipv6_cidr_block = "::/0"
+    gateway_id      = aws_internet_gateway.igw.id
   }
 
   tags = {
@@ -28,13 +28,16 @@ resource "aws_route_table" "my-web-route-table" {
   }
 }
 
+variable "subnet_prefix" {
+}
+
 resource "aws_subnet" "my-web-subnet" {
-  vpc_id = aws_vpc.my-web-vpc.id
-  cidr_block = "10.0.1.0/24"
-  availability_zone = "ap-southeast-1a"
+  vpc_id            = aws_vpc.my-web-vpc.id
+  cidr_block        = var.subnet_prefix[0].cidr_block
+  availability_zone = var.subnet_prefix[0].availability_zone
 
   tags = {
-    Name= "prod-subnet"
+    Name = "prod-subnet"
   }
 }
 
@@ -50,33 +53,33 @@ resource "aws_security_group" "allow_my-web" {
 
   ingress {
     description = "HTTPS"
-    from_port = 443
-    to_port = 443
-    protocol = "tcp"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     description = "HTTP"
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     description = "SSH"
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
     cidr_blocks = ["49.49.250.21/32"]
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -91,8 +94,8 @@ resource "aws_network_interface" "my-web-server-nic" {
 }
 
 resource "aws_eip" "one" {
-  domain = "vpc"
-  network_interface = aws_network_interface.my-web-server-nic.id
+  domain                    = "vpc"
+  network_interface         = aws_network_interface.my-web-server-nic.id
   associate_with_private_ip = "10.0.1.50"
-  depends_on = [aws_internet_gateway.igw]
+  depends_on                = [aws_internet_gateway.igw]
 }
